@@ -97,28 +97,30 @@ class LogisticRegressionNewton(Model):
         H = np.zeros((ft_num, ft_num))
         
         X = X.toarray()
-        G = []
+        #G = []
             #compute Hessian 
         for j in range(ft_num):
             curr_sum = 0
-            curr_der = 0
+            #curr_der = 0
             for i in range(X.shape[0]):
                 #print(X[i][j])
                 #print(X[i][k])
                 #print(p_pr(X[i][:]))
-                curr_sum += X[i][j] * X[i][:] * p_pr(X[i][:])[0]
+                sig = np.matmul(w.transpose(), X[i][:].reshape((ft_num, 1)))
+                curr_sum += X[i][j] * X[i][:] * p_pr(sig)[0]
+             #   curr_der += (y[i] - sigmoid(np.matmul(w.transpose(), X[i].reshape((ft_num, 1))))[0])*X[i][j]
+            #G.append(curr_der)
+            H[j][:] = - 1 * curr_sum
+        #(X[i][:]).reshape((ft_num, 1)) * (y[i] - sigmoid(sig[0]))[0]
+        
+        G = []
+            #compute Hessian 
+        for j in range(ft_num):
+         #   curr_sum = 0
+            curr_der = 0
+            for i in range(X.shape[0]):
                 curr_der += (y[i] - sigmoid(np.matmul(w.transpose(), X[i].reshape((ft_num, 1))))[0])*X[i][j]
             G.append(curr_der)
-            H[j][:] = - 1 * curr_sum
-
-        #G = []
-            #compute Hessian 
-        #for j in range(ft_num):
-         #   curr_sum = 0
-         #   curr_der = 0
-          #  for i in range(X.shape[0]):
-           #     curr_der += (y[i] - sigmoid(np.matmul(w.transpose(), X[i].reshape((ft_num, 1))))[0])*X[i][j]
-           # G.append(curr_der)
             
         #compute G
         #G = np.zeros((ft_num, 1))
