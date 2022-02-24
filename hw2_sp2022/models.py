@@ -36,7 +36,7 @@ class LogisticRegressionSGD(Model):
 
     def __init__(self, n_features, learning_rate = 0.1):
         super().__init__()
-        # TODO: Initialize parameters, learning rate
+        #initialize parameters
         self.w = np.zeros((n_features, 1))
         self.lr = learning_rate
         
@@ -84,11 +84,10 @@ class LogisticRegressionNewton(Model):
 
     def __init__(self, n_features):
         super().__init__()
-        # TODO: Initialize parameters
+        #initialize w
         self.w = np.zeros((n_features, 1))
 
     def fit(self, X, y):
-        # TODO: Write code to fit the model
         #initiate variables
         w = self.w
         ft_num = w.shape[0]
@@ -113,7 +112,6 @@ class LogisticRegressionNewton(Model):
         
 
     def predict(self, X):
-        # TODO: Write code to make predictions
         #get rid of sparse matrix type
         X = X.toarray()
         
