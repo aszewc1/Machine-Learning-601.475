@@ -4,6 +4,10 @@ def sigmoid(x):
     x = np.clip(x, a_min = -709, a_max = 709)
     return 1 / (1 + np.exp(-x))
 
+#helper function to calculate the derivative of the probability
+def p_pr(x):
+    return(sigmoid(x) * (1 - sigmoid(x)))
+
 class Model(object):
 
     def __init__(self):
@@ -88,8 +92,66 @@ class LogisticRegressionNewton(Model):
 
     def fit(self, X, y):
         # TODO: Write code to fit the model
-        pass
+        w = self.w
+        ft_num = w.shape[0]
+        H = np.zeros((ft_num, ft_num))
+        
+        X = X.toarray()
+        G = []
+            #compute Hessian 
+        for j in range(ft_num):
+            curr_sum = 0
+            curr_der = 0
+            for i in range(X.shape[0]):
+                #print(X[i][j])
+                #print(X[i][k])
+                #print(p_pr(X[i][:]))
+                curr_sum += X[i][j] * X[i][:] * p_pr(X[i][:])[0]
+                curr_der += (y[i] - sigmoid(np.matmul(w.transpose(), X[i].reshape((ft_num, 1))))[0])*X[i][j]
+            G.append(curr_der)
+            H[j][:] = - 1 * curr_sum
+
+        #G = []
+            #compute Hessian 
+        #for j in range(ft_num):
+         #   curr_sum = 0
+         #   curr_der = 0
+          #  for i in range(X.shape[0]):
+           #     curr_der += (y[i] - sigmoid(np.matmul(w.transpose(), X[i].reshape((ft_num, 1))))[0])*X[i][j]
+           # G.append(curr_der)
+            
+        #compute G
+        #G = np.zeros((ft_num, 1))
+        #for i in range(X.shape[0]):
+        #    G += y[i] - sigmoid(np.matmul(w.transpose(), X[i].reshape((ft_num, 1)))[0])*(X[i][:].reshape((ft_num, 1)))
+    
+        G = np.array(G)
+     
+        w = w.reshape((ft_num, 1)) - (np.matmul(np.linalg.pinv(H), G)).reshape((ft_num, 1))
+        self.w = w
+        
 
     def predict(self, X):
         # TODO: Write code to make predictions
-        pass
+        #get rid of sparse matrix type
+        X = X.toarray()
+        
+        #slice w to fit the appropriate number of testing features
+        w_slice = []
+        w = self.w
+        for i in range(X.shape[1]):
+            w_slice.append(w[i])
+        w_slice = np.array(w_slice)
+       
+        #multiply w and X to get probabilities
+        res = sigmoid(np.matmul(X, w_slice))
+
+        #perform classification predictions (0 or 1) based on probabilities
+        for i in range(res.shape[0]):
+            if res[i][0] < .5:
+                res[i][0] = 0
+            else:
+                res[i][0] = 1
+        
+        #return final predictions
+        return (res)
