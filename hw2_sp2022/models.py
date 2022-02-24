@@ -40,27 +40,43 @@ class LogisticRegressionSGD(Model):
         self.lr = learning_rate
         
 
-    def fit(self, X, y):
+    def fit(self, X, y):    
+        #initiate variables
         w = self.w
         lr = self.lr
         X = X.toarray()
         ft_num = w.shape[0]
-        print(X.shape)
+        
+        #cycle through each row of x to update the features in w
         for i in range(X.shape[0]):
-            for j in range(w.shape[0]):
-                sig = np.matmul(w.transpose(), X[i][:].reshape((ft_num, 1)))
-                w[j] = w[j] + (lr * X[i][j]) * (y[i] - sigmoid(sig[0]))
+            curr_w = w
+            sig = np.matmul(curr_w.transpose(), X[i][:].reshape((ft_num, 1)))
+            w = (curr_w).reshape((ft_num, 1)) + lr * (X[i][:]).reshape((ft_num, 1)) * (y[i] - sigmoid(sig[0]))[0]
+       
         self.w = w
 
     def predict(self, X):
-        # TODO: Write code to make predictions
+        #get rid of sparse matrix type
         X = X.toarray()
-        res = sigmoid(np.matmul(X, self.w))
+        
+        #slice w to fit the appropriate number of testing features
+        w_slice = []
+        w = self.w
+        for i in range(X.shape[1]):
+            w_slice.append(w[i])
+        w_slice = np.array(w_slice)
+       
+        #multiply w and X to get probabilities
+        res = sigmoid(np.matmul(X, w_slice))
+
+        #perform classification predictions (0 or 1) based on probabilities
         for i in range(res.shape[0]):
             if res[i][0] < .5:
                 res[i][0] = 0
             else:
                 res[i][0] = 1
+        
+        #return final predictions
         return (res)
 
 class LogisticRegressionNewton(Model):
@@ -68,7 +84,7 @@ class LogisticRegressionNewton(Model):
     def __init__(self, n_features):
         super().__init__()
         # TODO: Initialize parameters
-        pass
+        self.w = np.zeros((n_features, 1))
 
     def fit(self, X, y):
         # TODO: Write code to fit the model
