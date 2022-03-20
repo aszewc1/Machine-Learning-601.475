@@ -1,5 +1,4 @@
 import numpy as np
-from sympy import interpolating_poly
 
 def sigmoid(x):
     x = np.clip(x, a_min = -709, a_max = 709)
