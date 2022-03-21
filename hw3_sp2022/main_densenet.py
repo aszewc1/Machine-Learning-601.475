@@ -160,10 +160,7 @@ if __name__ == "__main__":
         predictions = []
         for test_case in TEST_IMAGES:
             # Normalize your test dataset (identical to how you did it with training images)
-            flat_test_imgs = np.array(
-                [TEST_IMAGES[i].flatten() for i in range(TEST_IMAGES.shape[0])])
-            flat_testimgs = (
-                flat_test_imgs - flat_test_imgs.mean(axis=0)) / flat_test_imgs.std(axis=0)
+            test_case = normalize(test_case)
 
             x = torch.from_numpy(test_case.astype(np.float32))
             x = x.view(1, -1)
