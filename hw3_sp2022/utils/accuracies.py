@@ -3,7 +3,7 @@ import numpy as np
 import torch.nn.functional as F
 
 
-def accuracy(y : np.ndarray, y_hat : np.ndarray) -> np.float64:
+def accuracy(y: np.ndarray, y_hat: np.ndarray) -> np.float64:
     """Calculate the simple accuracy given two numpy vectors, each with int values
     corresponding to each class.
 
@@ -14,13 +14,10 @@ def accuracy(y : np.ndarray, y_hat : np.ndarray) -> np.float64:
     Returns:
         np.float64: accuracy
     """
-    ### TODO Implement accuracy function
-    
-    
-    raise NotImplementedError
+    return (y == y_hat).mean()
 
 
-def approx_train_acc_and_loss(model, train_data : np.ndarray, train_labels : np.ndarray) -> np.float64:
+def approx_train_acc_and_loss(model, train_data: np.ndarray, train_labels: np.ndarray) -> np.float64:
     """Given a model, training data and its associated labels, calculate the simple accuracy when the 
     model is applied to the training dataset.
     This function is meant to be run during training to evaluate model training accuracy during training.
@@ -42,7 +39,7 @@ def approx_train_acc_and_loss(model, train_data : np.ndarray, train_labels : np.
     return accuracy(train_labels[idxs], y_pred.numpy()), loss.item()
 
 
-def dev_acc_and_loss(model, dev_data : np.ndarray, dev_labels : np.ndarray) -> np.float64:
+def dev_acc_and_loss(model, dev_data: np.ndarray, dev_labels: np.ndarray) -> np.float64:
     """Given a model, a validation dataset and its associated labels, calcualte the simple accuracy when the
     model is applied to the validation dataset.
     This function is meant to be run during training to evaluate model validation accuracy.
