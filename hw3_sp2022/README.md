@@ -10,4 +10,8 @@ bestmodel
 
 From previous sections, I learned that CNN is effective for training on image data. I continued to experiment with learning rate, batch size, and epochs after defining a few models that combine convolutional and linear layers. I found that max pooling was useful since the images have high contrast against the background. Furthermore, I found that adding more convolutional layers increased abstraction, while adding some fully connected layers at the end allowed for combining the benefits of dense layers and sparser layers by pooling and flattening data prior to feeding into linear layers. Finally, dropout was added to prevent overfitting with the model.
 
-For the bestmodel, a learning rate of 0.001, batch size of 100, and 2000 epochs were used for optimal performance at the end of training.
+Using a higher learning rate caused the model to fail. Additionally, using too few layers as well as average pooling resulted in worse performance, as did failure to use an activation function between all layers.
+
+The final model included three convolutional layers with relu activation and max pooling, followed by three linear layers with relu activation as well.
+
+A learning rate of 0.001, batch size of 100, and 2000 epochs were used for optimal performance at the end of training.
