@@ -12,18 +12,47 @@ from utils.accuracies import (
 
 class BestModel(torch.nn.Module):
     # TODO Implement your model's structure and input/filter/output dimensions
-    def __init__(self):
+    def __init__(self, hidden_layer_width, input_height, input_width, n_classes):
         super().__init__()
 
-        # TODO Implement your model here
+        self.height = input_height
+        self.width = input_width
 
-        raise NotImplementedError
+        self.conv1 = torch.nn.Conv2d(1, 16, 3)
+        self.conv2 = torch.nn.Conv2d(16, 32, 3)
+        self.maxPool1 = torch.nn.MaxPool2d(2, stride=2)
+
+        self.conv3 = torch.nn.Conv2d(32, 64, 3)
+        self.conv4 = torch.nn.Conv2d(64, 128, 3)
+        self.maxPool2 = torch.nn.MaxPool2d(8, stride=8)
+
+        self.lin1 = torch.nn.Linear(128, hidden_layer_width)
+        self.lin2 = torch.nn.Linear(hidden_layer_width, n_classes)
 
     def forward(self, x):
 
-        # TODO Implement your best model's forward pass module
+        x = x.reshape((x.shape[0], 1, self.height, self.width))
 
-        raise NotImplementedError
+        x = self.conv1(x)
+        x = F.relu(x)
+        x = self.conv2(x)
+        x = F.relu(x)
+        x = self.maxPool1(x)
+
+        x = self.conv3(x)
+        x = F.relu(x)
+        x = self.conv4(x)
+        x = F.relu(x)
+        x = self.maxPool2(x)
+
+        x = x.squeeze(axis=2)
+        x = x.squeeze(axis=2)
+
+        x = self.lin1(x)
+        x = F.relu(x)
+        x = self.lin2(x)
+
+        return x
 
 
 def normalize(img):
@@ -76,8 +105,8 @@ if __name__ == "__main__":
         logger.writeheader()
 
         # TODO change depending on your model's instantiation
-        model = BestModel(input_height=HEIGHT, input_width=WIDTH,
-                          n_classes=N_CLASSES)
+        model = BestModel(hidden_layer_width=200, input_height=HEIGHT,
+                          input_width=WIDTH, n_classes=N_CLASSES)
 
         # TODO (OPTIONAL) : you can change the choice of optimizer here if you wish.
         optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
