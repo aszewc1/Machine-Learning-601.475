@@ -18,18 +18,11 @@ class BestModel(torch.nn.Module):
         self.height = input_height
         self.width = input_width
 
-        self.conv1 = torch.nn.Conv2d(1, 16, 3)
-        self.conv2 = torch.nn.Conv2d(16, 32, 3)
-        self.maxPool1 = torch.nn.MaxPool2d(2, stride=2)
+        self.conv1 = torch.nn.Conv2d(1, 32, 5)
+        self.conv2 = torch.nn.Conv2d(32, 64, 3)
+        self.conv3 = torch.nn.Conv2d(64, 128, 3)
 
-        self.conv3 = torch.nn.Conv2d(32, 64, 3)
-        self.conv4 = torch.nn.Conv2d(64, 128, 3)
-        self.maxPool2 = torch.nn.MaxPool2d(8, stride=8)
-
-        self.conv5 = torch.nn.Conv2d(1, 32, 5)
-        self.conv6 = torch.nn.Conv2d(32, 128, 3)
-        self.maxPool5 = torch.nn.MaxPool2d(4, stride=4)
-        self.maxPool6 = torch.nn.MaxPool2d(4, stride=4)
+        self.maxPool = torch.nn.MaxPool2d(2, stride=2)
 
         self.lin1 = torch.nn.Linear(128, hidden_layer_width)
         self.lin2 = torch.nn.Linear(hidden_layer_width, 4 * n_classes)
@@ -41,23 +34,9 @@ class BestModel(torch.nn.Module):
 
         x = x.reshape((x.shape[0], 1, self.height, self.width))
 
-        # x = self.conv1(x)
-        # x = F.relu(x)
-        # x = self.conv2(x)
-        # x = F.relu(x)
-        # x = self.maxPool1(x)
-
-        # x = self.conv3(x)
-        # x = F.relu(x)
-        # x = self.conv4(x)
-        # x = F.relu(x)
-        # x = self.maxPool2(x)
-
-        # x = x.squeeze(axis=2)
-        # x = x.squeeze(axis=2)
-
-        x = self.maxPool5(F.relu(self.conv5(x)))
-        x = self.maxPool6(F.relu(self.conv6(x)))
+        x = self.maxPool(F.relu(self.conv1(x)))
+        x = self.maxPool(F.relu(self.conv2(x)))
+        x = self.maxPool(F.relu(self.conv3(x)))
 
         x = torch.flatten(x, 1)
 
@@ -65,7 +44,9 @@ class BestModel(torch.nn.Module):
         x = F.relu(x)
         x = self.dropout(x)
         x = self.lin2(x)
+        x = F.relu(x)
         x = self.lin3(x)
+        x = F.relu(x)
 
         return x
 
