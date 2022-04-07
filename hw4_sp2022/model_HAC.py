@@ -135,4 +135,10 @@ class AgglomerativeClustering(Model):
             
             curr_clust_num = (np.unique(np.array(labels))).shape[0]
 
+        for i in range(num_clusters):
+            if i in labels:
+                continue
+            else:
+                labels = [i if item == max(labels) else item for item in labels]
+            
         return labels
