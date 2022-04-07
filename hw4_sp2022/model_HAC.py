@@ -25,7 +25,21 @@ def complete(clust1, clust2, X):
             curr_dist = np.linalg.norm(X[cluster1[k]][:] - X[cluster2[l]][:])
             if curr_dist > best_dist:
                 best_dist = curr_dist
+    if(len(cluster1) == 0 or len(cluster2)==0):
+        best_dist = 10000000
     return best_dist
+
+def average(clust1, clust2, X):
+    sum = 0
+    cluster1 = clust1.tolist()
+    cluster2 = clust2.tolist()
+    for k in range(len(cluster1)):
+        for l in range(len(cluster2)):
+            sum += np.linalg.norm(X[cluster1[k]][:] - X[cluster2[l]][:])
+    if(len(cluster1) == 0 or len(cluster2)==0):
+        return 10000000
+    sum /= (len(cluster1)*len(cluster2))
+    return sum
 
 class Model(object):
     """ Abstract model object."""
@@ -34,7 +48,7 @@ class Model(object):
         raise NotImplementedError()
 
     def fit_predict(self, X):
-        """ Predict.
+        """ Predict
 
         Args:
             X: A dense matrix of floats with shape
@@ -72,10 +86,8 @@ class AgglomerativeClustering(Model):
         """
         # TODO: Implement this!
 
-        clusters = np.array(X)
-        print(X.shape[0])
         labels = list(range(0, X.shape[0]))
-        print(labels)
+        
         num_clusters = self.n_clusters
         curr_clust_num = (np.unique(np.array(labels))).shape[0]
         while(curr_clust_num > num_clusters):
@@ -88,13 +100,16 @@ class AgglomerativeClustering(Model):
                     if i == j or labels[i] == labels[j]:
                         continue
 
+                    #indexes in X where labels = i (cluster num)
                     clust1 = np.where(np.array(labels) == i)[0]
                     clust2 = np.where(np.array(labels) == j)[0]
+
                     if self.linking == "single":
                         curr_dist = single(clust1, clust2, X)
                     elif self.linking == "complete":
                         curr_dist = complete(clust1, clust2, X)
-                    
+                    elif self.linking == "average":
+                        curr_dist = average(clust1, clust2, X)
                     
                     i_ind = i
                     j_ind = j
@@ -103,26 +118,21 @@ class AgglomerativeClustering(Model):
                         best_dist = curr_dist
                         best_i_ind = i_ind
                         best_j_ind = j_ind
-              
-            print(best_i_ind)
-            print(best_j_ind)
-            
+                    #tie breaking
+                    elif curr_dist == best_dist: 
+                        old_clust1 = np.where(np.array(labels) == best_i_ind)[0]
+                        old_clust2 = np.where(np.array(labels) == best_j_ind)[0] 
+                        new_key = tuple(sorted((clust1.tolist()[0], clust2.tolist()[0])))
+                        old_key = tuple(sorted((old_clust1.tolist()[0], old_clust2.tolist()[0])))
+                        if new_key < old_key:
+                            best_dist = curr_dist
+                            best_i_ind = i_ind
+                            best_j_ind = j_ind
+
             new_cluster = labels[best_i_ind]
             old_cluster = labels[best_j_ind]
             labels = [new_cluster if item == old_cluster else item for item in labels]
             
             curr_clust_num = (np.unique(np.array(labels))).shape[0]
-            print(labels)
-         
-        print(labels)
-                
 
-        
-        #create a cluster for each row in X
-        #loop through every combination of every cluster (nested for)
-        #merge two clusters with smallest distance
-        #repeat until #of clusters = n_clusters
-        #return list of labels for every example (for every row in x)
-
-        #idea: maybe make x a dataframe and add a column that represents cluster
         return labels
