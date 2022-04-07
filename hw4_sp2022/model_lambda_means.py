@@ -78,28 +78,34 @@ class LambdaMeans(Model):
                 [num_examples, num_features].
             iterations: int giving number of clustering iterations
         """
-        # TODO: Implement this!
-        
         X = X.toarray()
-        print(X)
         #cluster initialization
-        mu = [sum(X)/len(X)]
-        clusters = 1
+        initial = np.sum(X, axis=0)/len(X)
+        mu = []
+        mu.append(initial)
+        
         #repeat for given number of iterations
         for i in range(iterations):
+
             #e step
-            for k in range(clusters):
-                r = 0
-                if k == np.linalg.norm(X[i] - mu[i]) and np.linalg.norm(X[i] - mu) <= self.lambda0:
-                    r = 1
-                r_new_clust = 0
-                if np.linalg.norm(X[i] - mu[i]) > self.lambda0:
-                    r_new_clust = 1
-                if r_new_clust == 1:
-                    mu[i+1] = X[i]
-            #mstep
-            for k in range(clusters):
-                mu[k] = sum(r*X[i])/sum(r)
+            r_tot = []
+            
+            for n in range(X.shape[0]):
+                for k in range(len(mu)):
+                    r = 0
+                    if k == np.linalg.norm(X[n][:] - mu[k]) and np.linalg.norm(X[n][:] - mu[k]) <= self.lambda0:
+                        r = 1
+                    r_tot.append(r)
+
+                    r_new_clust = 0
+                    if np.linalg.norm(X[i] - mu[k]) > self.lambda0:
+                        r_new_clust = 1
+                    if r_new_clust == 1:
+                        mu.append(X[n][:])
+            #m step
+            for k in range(len(mu)):
+                mu[k] = (sum(r)*np.sum(X, axis = 0))/sum(r)
+        self.mu = mu
 
     def predict(self, X):
         """ Predict.
@@ -111,5 +117,28 @@ class LambdaMeans(Model):
         Returns:
             A dense array of ints with shape [num_examples].
         """
-        # TODO: Implement this!
-        raise Exception("You must implement this method!")
+        #initializations
+        mu = self.mu
+        X = X.toarray()
+        labels = list(range(0, X.shape[0]))
+        #loop through examples in x
+        for n in range(X.shape[0]):
+            best_dist = 100000000000
+            best_k = 0
+            for k in range(len(mu)):
+                #find distance between n and cluster
+                curr_dist = np.linalg.norm(X[n][:] - mu[k])
+                #update closest cluster
+                if curr_dist < best_dist:
+                    curr_dist = best_dist
+                    best_k = k
+                #tie breaking
+                elif curr_dist == best_dist:
+                    if k < best_k:
+                        curr_dist = best_dist
+                        best_k = k
+            labels[n] = best_k
+        return labels
+                
+
+
