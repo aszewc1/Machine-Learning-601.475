@@ -144,14 +144,8 @@ class LambdaMeans(Model):
 
                 # update closest cluster
                 if curr_dist < best_dist:
-                    curr_dist = best_dist
+                    best_dist = curr_dist
                     best_k = k
-
-                # tie breaking
-                elif curr_dist == best_dist:
-                    if k < best_k:
-                        curr_dist = best_dist
-                        best_k = k
 
             labels.append = best_k
 
