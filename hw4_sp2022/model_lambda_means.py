@@ -88,23 +88,28 @@ class LambdaMeans(Model):
         for i in range(iterations):
 
             #e step
-            r_tot = []
             
+            r = [0] * len(mu)
             for n in range(X.shape[0]):
-                for k in range(len(mu)):
-                    r = 0
-                    if k == np.linalg.norm(X[n][:] - mu[k]) and np.linalg.norm(X[n][:] - mu[k]) <= self.lambda0:
-                        r = 1
-                    r_tot.append(r)
+               
+                #find closest existing cluster
 
-                    r_new_clust = 0
-                    if np.linalg.norm(X[i] - mu[k]) > self.lambda0:
-                        r_new_clust = 1
-                    if r_new_clust == 1:
-                        mu.append(X[n][:])
+                dist = np.linalg.norm(np.array(mu) - X[n][:], axis = 1)
+                #I think problem is in line 99/100 --> trying to look at piazza 436 question to vectorize and it's going poorly
+                if any(dist <= self.lambda0):
+                    r[(dist.tolist()).index(min(dist.tolist()))] = 1
+                
+                #check for/create new cluster
+                if min(dist) > self.lambda0:
+                    r.append(1)
+                    mu.append(X[n][:])
+                else:
+                    r.append(0)
+
             #m step
             for k in range(len(mu)):
                 mu[k] = (sum(r)*np.sum(X, axis = 0))/sum(r)
+
         self.mu = mu
 
     def predict(self, X):
