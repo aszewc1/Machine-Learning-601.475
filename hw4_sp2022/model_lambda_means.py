@@ -1,4 +1,4 @@
-""" 
+"""
 Keep model implementations in here.
 
 This file is where you will write all of your code!
@@ -6,6 +6,7 @@ This file is where you will write all of your code!
 
 import numpy as np
 from tqdm import tqdm
+
 
 class Model(object):
     """ Abstract model object.
@@ -16,7 +17,6 @@ class Model(object):
     def __init__(self, nfeatures):
         self.num_input_features = nfeatures
 
-
     def fit(self, *, X, iterations):
         """ Fit the model.
 
@@ -26,7 +26,6 @@ class Model(object):
             iterations: int giving number of clustering iterations
         """
         raise NotImplementedError()
-
 
     def predict(self, X):
         """ Predict.
@@ -39,7 +38,6 @@ class Model(object):
             A dense array of ints with shape [num_examples].
         """
         raise NotImplementedError()
-
 
     def _fix_test_feats(self, X):
         """ Fixes some feature disparities between datasets.
@@ -64,8 +62,7 @@ class LambdaMeans(Model):
             nfeatures: size of feature space (only needed for _fix_test_feats)
             lambda0: A float giving the default value for lambda
         """
-        #initialize parameters
-        self.nfeatures = nfeatures 
+        # initialize parameter
         self.lambda0 = lambda0
 
     def fit(self, *, X, iterations):
@@ -79,36 +76,40 @@ class LambdaMeans(Model):
             iterations: int giving number of clustering iterations
         """
         X = X.toarray()
-        #cluster initialization
-        initial = np.sum(X, axis=0)/len(X)
+        numInstances = X.shape[0]
+
+        # cluster initialization
+        initial = np.sum(X, axis=0)/numInstances
+        lambd = sum(np.linalg.norm(x - initial) for x in X)/numInstances
+        lambd = lambd if self.lambda0 == 0 else self.lambda0
         mu = []
         mu.append(initial)
-        
-        #repeat for given number of iterations
+
+        # repeat for given number of iterations
         for i in range(iterations):
 
-            #e step
-            
-            r = [0] * len(mu)
-            for n in range(X.shape[0]):
-               
-                #find closest existing cluster
+            # e step
+            r = np.zeros((numInstances, len(mu)))
+            for n in range(numInstances):
 
-                dist = np.linalg.norm(np.array(mu) - X[n][:], axis = 1)
-                #I think problem is in line 99/100 --> trying to look at piazza 436 question to vectorize and it's going poorly
-                if any(dist <= self.lambda0):
-                    r[(dist.tolist()).index(min(dist.tolist()))] = 1
-                
-                #check for/create new cluster
-                if min(dist) > self.lambda0:
-                    r.append(1)
-                    mu.append(X[n][:])
+                example = X[n, :]
+
+                # find closest existing cluster
+                dist = np.linalg.norm(example - np.array(mu), axis=1)
+
+                if any(dist <= lambd):
+                    r[n, np.argmin(dist)] = 1
                 else:
-                    r.append(0)
+                    mu.append(example)
+                    if len(mu) > r.shape[1]:
+                        # expand array if too small
+                        r = np.append(r, np.zeros(
+                            (numInstances, len(mu))), axis=1)
+                    r[n, len(mu)-1] = 1
 
-            #m step
+            # m step
             for k in range(len(mu)):
-                mu[k] = (sum(r)*np.sum(X, axis = 0))/sum(r)
+                mu[k] = sum(X[r[:, k] == 1, :])/sum(r[:, k])
 
         self.mu = mu
 
@@ -122,28 +123,36 @@ class LambdaMeans(Model):
         Returns:
             A dense array of ints with shape [num_examples].
         """
-        #initializations
+        # initializations
         mu = self.mu
         X = X.toarray()
-        labels = list(range(0, X.shape[0]))
-        #loop through examples in x
-        for n in range(X.shape[0]):
-            best_dist = 100000000000
+        numInstances = X.shape[0]
+        labels = []
+
+        # loop through examples in x
+        for n in range(numInstances):
+
+            example = X[n, :]
+
+            best_dist = np.inf
             best_k = 0
+
             for k in range(len(mu)):
-                #find distance between n and cluster
-                curr_dist = np.linalg.norm(X[n][:] - mu[k])
-                #update closest cluster
+
+                # find distance between n and cluster
+                curr_dist = np.linalg.norm(example - mu[k])
+
+                # update closest cluster
                 if curr_dist < best_dist:
                     curr_dist = best_dist
                     best_k = k
-                #tie breaking
+
+                # tie breaking
                 elif curr_dist == best_dist:
                     if k < best_k:
                         curr_dist = best_dist
                         best_k = k
-            labels[n] = best_k
+
+            labels.append = best_k
+
         return labels
-                
-
-
