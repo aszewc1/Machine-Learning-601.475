@@ -125,7 +125,7 @@ class LambdaMeans(Model):
         """
         # initializations
         mu = self.mu
-        X = X.toarray()
+        X = self._fix_test_feats(X).toarray()
         numInstances = X.shape[0]
         labels = []
 
@@ -147,6 +147,6 @@ class LambdaMeans(Model):
                     best_dist = curr_dist
                     best_k = k
 
-            labels.append = best_k
+            labels.append(best_k)
 
         return labels

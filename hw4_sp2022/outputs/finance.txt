@@ -1,0 +1,22 @@
+VI: 1.656542
+VI: 1.384595
+Label distribution:
+Label 2: 119
+Label 0: 350
+Label 1: 47
+Label 3: 18
+Label 8: 6
+Label 4: 1
+Label 5: 1
+Label 6: 2
+Label 7: 4
+Label 9: 1
+Label 10: 1
+11 unique labels
+Label distribution:
+Label 0: 19
+Label 1: 3
+Label 2: 6
+Label 5: 1
+Label 7: 1
+5 unique labels
